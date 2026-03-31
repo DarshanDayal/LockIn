@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model LkUser {
+  id         String       @id @default(cuid())
+  supabaseId String       @unique
+  email      String       @unique
+  username   String       @default("user")
+  createdAt  DateTime     @default(now())
+  groups     LkGroup[]
+  habits     LkHabit[]
+  logs       LkLog[]
+
+  @@map("lk_users")
+}
+
+model LkGroup {
+  id        String    @id @default(cuid())
+  userId    String
+  name      String
+  icon      String    @default("🌅")
+  sortOrder Int       @default(0)
+  user      LkUser    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habits    LkHabit[]
+
+  @@index([userId])
+  @@map("lk_groups")
+}
+
+model LkHabit {
+  id          String   @id @default(cuid())
+  userId      String
+  groupId     String?
+  name        String
+  description String?
+  emoji       String   @default("✅")
+  targetDays  Int[]
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  user        LkUser   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group       LkGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  logs        LkLog[]
+
+  @@index([userId])
+  @@map("lk_habits")
+}
+
+model LkLog {
+  id          String   @id @default(cuid())
+  habitId     String
+  userId      String
+  date        String
+  completedAt DateTime @default(now())
+  habit       LkHabit  @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  user        LkUser   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@index([userId, date])
+  @@map("lk_logs")
+}

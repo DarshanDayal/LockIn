@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  background-color: #0d0f10;
+  color: #d4d8db;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #0d0f10; }
+::-webkit-scrollbar-thumb { background: #2a2d2f; border-radius: 2px; }
+
+/* Selection */
+::selection { background: #4ade8030; }
