@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 
 interface HabitRowProps {
   id: string;
@@ -13,18 +12,9 @@ interface HabitRowProps {
 }
 
 export function HabitRow({ id, name, description, emoji, isDone, streak, onToggle }: HabitRowProps) {
-  const [pending, setPending] = useState(false);
-
-  async function handleToggle() {
-    setPending(true);
-    await onToggle(id, isDone);
-    setPending(false);
-  }
-
   return (
     <button
-      onClick={handleToggle}
-      disabled={pending}
+      onClick={() => onToggle(id, isDone)}
       className="w-full flex items-start gap-3 py-2 text-left group"
     >
       {/* Checkbox */}

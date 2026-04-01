@@ -63,6 +63,20 @@ export default function HabitsPage() {
   }, [fetchHabits, fetchWeekData]);
 
   async function handleToggle(id: string, isDone: boolean) {
+    // Optimistic update — flip the log state immediately
+    setHabits((prev) =>
+      prev.map((h) =>
+        h.id !== id
+          ? h
+          : {
+              ...h,
+              logs: isDone
+                ? h.logs.filter((l) => l.date !== todayStr)
+                : [...h.logs, { date: todayStr }],
+            }
+      )
+    );
+
     if (isDone) {
       await fetch(`/api/log/${id}?date=${todayStr}`, { method: "DELETE" });
     } else {
