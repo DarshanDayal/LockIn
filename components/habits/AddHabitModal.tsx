@@ -14,10 +14,11 @@ interface Group {
 interface AddHabitModalProps {
   groups: Group[];
   onCreated: () => void;
+  onGroupCreated: () => void;
   onClose: () => void;
 }
 
-export function AddHabitModal({ groups, onCreated, onClose }: AddHabitModalProps) {
+export function AddHabitModal({ groups, onCreated, onGroupCreated, onClose }: AddHabitModalProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [emoji, setEmoji] = useState("✅");
@@ -47,7 +48,7 @@ export function AddHabitModal({ groups, onCreated, onClose }: AddHabitModalProps
     setGroupId(group.id);
     setNewGroupName("");
     setCreatingGroup(false);
-    onCreated(); // refresh groups
+    onGroupCreated();
   }
 
   async function handleSubmit(e: React.FormEvent) {

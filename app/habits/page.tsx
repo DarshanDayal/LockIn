@@ -176,6 +176,7 @@ export default function HabitsPage() {
         <AddHabitModal
           groups={groups}
           onCreated={() => { fetchHabits(); setShowModal(false); }}
+          onGroupCreated={fetchHabits}
           onClose={() => setShowModal(false)}
         />
       )}

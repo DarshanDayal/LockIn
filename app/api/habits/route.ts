@@ -57,16 +57,20 @@ export async function POST(req: NextRequest) {
 
   if (!name?.trim()) return NextResponse.json({ error: "Name required" }, { status: 400 });
 
-  const habit = await prisma.lkHabit.create({
-    data: {
-      userId: profile.id,
-      name: name.trim(),
-      description: description?.trim() ?? null,
-      emoji: emoji ?? "✅",
-      groupId: groupId ?? null,
-      targetDays: targetDays ?? [],
-    },
-  });
-
-  return NextResponse.json({ habit });
+  try {
+    const habit = await prisma.lkHabit.create({
+      data: {
+        userId: profile.id,
+        name: name.trim(),
+        description: description?.trim() ?? null,
+        emoji: emoji ?? "✅",
+        groupId: groupId ?? null,
+        targetDays: targetDays ?? [],
+      },
+    });
+    return NextResponse.json({ habit });
+  } catch (err) {
+    console.error("Failed to create habit:", err);
+    return NextResponse.json({ error: "Failed to create habit" }, { status: 500 });
+  }
 }
