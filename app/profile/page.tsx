@@ -28,7 +28,6 @@ export default function ProfilePage() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [confirmDelete, setConfirmDelete] = useState<{ type: "habit" | "group"; id: string; name: string } | null>(null);
-  const [deleting, setDeleting] = useState(false);
 
   const fetchData = useCallback(async () => {
     const res = await fetch("/api/habits");
@@ -56,14 +55,17 @@ export default function ProfilePage() {
 
   async function handleDelete() {
     if (!confirmDelete) return;
-    setDeleting(true);
+    // Optimistic update — remove from list immediately
+    if (confirmDelete.type === "habit") {
+      setHabits((prev) => prev.filter((h) => h.id !== confirmDelete.id));
+    } else {
+      setGroups((prev) => prev.filter((g) => g.id !== confirmDelete.id));
+    }
+    setConfirmDelete(null);
     const url = confirmDelete.type === "habit"
       ? `/api/habits/${confirmDelete.id}`
       : `/api/groups/${confirmDelete.id}`;
-    await fetch(url, { method: "DELETE" });
-    setConfirmDelete(null);
-    setDeleting(false);
-    fetchData();
+    fetch(url, { method: "DELETE" });
   }
 
   return (
@@ -167,10 +169,9 @@ export default function ProfilePage() {
             <div className="flex gap-3">
               <button
                 onClick={handleDelete}
-                disabled={deleting}
-                className="flex-1 py-2 text-sm bg-red-500/20 text-red-400 border border-red-400/30 rounded hover:bg-red-500/30 disabled:opacity-50 transition-colors"
+                className="flex-1 py-2 text-sm bg-red-500/20 text-red-400 border border-red-400/30 rounded hover:bg-red-500/30 transition-colors"
               >
-                {deleting ? "..." : "$ confirm delete"}
+                $ confirm delete
               </button>
               <button
                 onClick={() => setConfirmDelete(null)}

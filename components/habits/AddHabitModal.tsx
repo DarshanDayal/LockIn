@@ -24,13 +24,11 @@ export function AddHabitModal({ groups, onCreated, onGroupCreated, onClose }: Ad
   const [emoji, setEmoji] = useState("✅");
   const [groupId, setGroupId] = useState(groups[0]?.id ?? "");
   const [targetDays, setTargetDays] = useState<number[]>([]);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   // New group creation
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupIcon, setNewGroupIcon] = useState("📁");
-  const [creatingGroup, setCreatingGroup] = useState(false);
 
   function toggleDay(d: number) {
     setTargetDays((prev) => prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d]);
@@ -38,26 +36,24 @@ export function AddHabitModal({ groups, onCreated, onGroupCreated, onClose }: Ad
 
   async function handleCreateGroup() {
     if (!newGroupName.trim()) return;
-    setCreatingGroup(true);
+    setNewGroupName("");
     const res = await fetch("/api/groups", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: newGroupName.trim(), icon: newGroupIcon }),
     });
-    if (!res.ok) { setError("failed to create group"); setCreatingGroup(false); return; }
+    if (!res.ok) { setError("failed to create group"); return; }
     const { group } = await res.json();
     setGroupId(group.id);
-    setNewGroupName("");
-    setCreatingGroup(false);
     onGroupCreated();
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) { setError("name required"); return; }
-    setLoading(true);
-    setError("");
-    const res = await fetch("/api/habits", {
+    // Close immediately, sync in background
+    onClose();
+    fetch("/api/habits", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -67,10 +63,9 @@ export function AddHabitModal({ groups, onCreated, onGroupCreated, onClose }: Ad
         groupId: groupId || null,
         targetDays,
       }),
+    }).then((res) => {
+      if (res.ok) onCreated();
     });
-    if (!res.ok) { setError("failed to create"); setLoading(false); return; }
-    onCreated();
-    onClose();
   }
 
   return (
@@ -147,7 +142,7 @@ export function AddHabitModal({ groups, onCreated, onGroupCreated, onClose }: Ad
               <button
                 type="button"
                 onClick={handleCreateGroup}
-                disabled={creatingGroup || !newGroupName.trim()}
+                disabled={!newGroupName.trim()}
                 className="text-xs text-green hover:text-text disabled:opacity-40 border border-green/30 rounded px-2 py-1.5"
               >
                 + group
@@ -180,10 +175,9 @@ export function AddHabitModal({ groups, onCreated, onGroupCreated, onClose }: Ad
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full py-2.5 bg-green text-bg text-sm font-semibold rounded hover:opacity-90 disabled:opacity-50 transition-opacity"
+            className="w-full py-2.5 bg-green text-bg text-sm font-semibold rounded hover:opacity-90 transition-opacity"
           >
-            {loading ? "..." : "$ add habit"}
+            $ add habit
           </button>
         </form>
       </div>
