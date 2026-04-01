@@ -29,7 +29,7 @@ export function HabitRow({ id, name, description, emoji, isDone, streak, onToggl
     >
       {/* Checkbox */}
       <span
-        className={`text-sm flex-shrink-0 mt-0.5 w-6 text-center transition-colors ${
+        className={`text-sm flex-shrink-0 mt-0.5 w-8 text-center whitespace-nowrap transition-colors ${
           isDone ? "text-green" : "text-muted group-hover:text-text"
         }`}
       >

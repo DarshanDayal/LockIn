@@ -44,6 +44,7 @@ export function AddHabitModal({ groups, onCreated, onGroupCreated, onClose }: Ad
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: newGroupName.trim(), icon: newGroupIcon }),
     });
+    if (!res.ok) { setError("failed to create group"); setCreatingGroup(false); return; }
     const { group } = await res.json();
     setGroupId(group.id);
     setNewGroupName("");

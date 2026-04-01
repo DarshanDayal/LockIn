@@ -30,16 +30,19 @@ export async function POST(req: NextRequest) {
   const { name, icon } = body;
   if (!name?.trim()) return NextResponse.json({ error: "Name required" }, { status: 400 });
 
-  const count = await prisma.lkGroup.count({ where: { userId: profile.id } });
-
-  const group = await prisma.lkGroup.create({
-    data: {
-      userId: profile.id,
-      name: name.trim(),
-      icon: icon ?? "📁",
-      sortOrder: count,
-    },
-  });
-
-  return NextResponse.json({ group });
+  try {
+    const count = await prisma.lkGroup.count({ where: { userId: profile.id } });
+    const group = await prisma.lkGroup.create({
+      data: {
+        userId: profile.id,
+        name: name.trim(),
+        icon: icon ?? "📁",
+        sortOrder: count,
+      },
+    });
+    return NextResponse.json({ group });
+  } catch (err) {
+    console.error("Failed to create group:", err);
+    return NextResponse.json({ error: "Failed to create group" }, { status: 500 });
+  }
 }
