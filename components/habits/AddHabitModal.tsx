@@ -75,7 +75,7 @@ export function AddHabitModal({ groups, onCreated, onGroupCreated, onClose }: Ad
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 px-4 pb-4 sm:pb-0">
-      <div className="bg-surface border border-border rounded-lg w-full max-w-md p-5">
+      <div className="bg-surface border border-border rounded-lg w-full max-w-md p-5 overflow-y-auto max-h-[90vh]">
         <div className="flex items-center justify-between mb-4">
           <p className="text-green text-sm font-semibold">$ new habit</p>
           <button onClick={onClose} className="text-muted hover:text-text text-xs">✕ close</button>
