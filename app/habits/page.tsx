@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { format, subDays } from "date-fns";
+import { format } from "date-fns";
 import { TerminalHeader } from "@/components/layout/TerminalHeader";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { WeekStrip } from "@/components/habits/WeekStrip";
@@ -32,7 +32,7 @@ function toDateStr(d: Date) {
 export default function HabitsPage() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
-  const [todayStr, setTodayStr] = useState("");
+  const [todayStr, setTodayStr] = useState(() => toDateStr(new Date()));
   const [weekData, setWeekData] = useState<Record<string, number>>({});
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -46,7 +46,12 @@ export default function HabitsPage() {
     setLoading(false);
   }, []);
 
-  // Fetch last-7-days heatmap data for the week strip
+  const fetchGroups = useCallback(async () => {
+    const res = await fetch("/api/habits");
+    const data = await res.json();
+    setGroups(data.groups ?? []);
+  }, []);
+
   const fetchWeekData = useCallback(async () => {
     const res = await fetch("/api/stats/heatmap");
     const data = await res.json();
@@ -62,8 +67,8 @@ export default function HabitsPage() {
     fetchWeekData();
   }, [fetchHabits, fetchWeekData]);
 
-  async function handleToggle(id: string, isDone: boolean) {
-    // Optimistic update — flip the log state immediately
+  function handleToggle(id: string, isDone: boolean) {
+    // Optimistic update — instant UI response, fire-and-forget API
     setHabits((prev) =>
       prev.map((h) =>
         h.id !== id
@@ -78,16 +83,14 @@ export default function HabitsPage() {
     );
 
     if (isDone) {
-      await fetch(`/api/log/${id}?date=${todayStr}`, { method: "DELETE" });
+      fetch(`/api/log/${id}?date=${todayStr}`, { method: "DELETE" });
     } else {
-      await fetch(`/api/log/${id}`, {
+      fetch(`/api/log/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ date: todayStr }),
       });
     }
-    fetchHabits();
-    fetchWeekData();
   }
 
   // Filter habits for today
@@ -151,7 +154,7 @@ export default function HabitsPage() {
           </div>
         ) : (
           <div className="mt-2">
-            {grouped.map(({ group, habits: gHabits }, i) =>
+            {grouped.map(({ group, habits: gHabits }) =>
               group ? (
                 <HabitGroupBlock
                   key={group.id}
@@ -189,8 +192,8 @@ export default function HabitsPage() {
       {showModal && (
         <AddHabitModal
           groups={groups}
-          onCreated={() => { fetchHabits(); setShowModal(false); }}
-          onGroupCreated={fetchHabits}
+          onCreated={fetchHabits}
+          onGroupCreated={fetchGroups}
           onClose={() => setShowModal(false)}
         />
       )}
